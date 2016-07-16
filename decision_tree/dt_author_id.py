@@ -24,7 +24,18 @@ features_train, features_test, labels_train, labels_test = preprocess()
 
 #########################################################
 ### your code goes here ###
-
+from sklearn.tree import DecisionTreeClassifier
+print "number of features: ", features_train.shape[1]
+#sys.exit()
+clf = DecisionTreeClassifier(min_samples_split=40)
+t0 = time()
+clf.fit(features_train, labels_train)
+print "time spend in training classifier: ", round(time()-t0, 3), "s"
+t1 = time()
+pred = clf.predict(features_test)
+print "time spend in predicint test set: ", round(time()-t1, 3), "s"
+acc = clf.score(features_test, labels_test)
+print acc
 
 #########################################################
 
