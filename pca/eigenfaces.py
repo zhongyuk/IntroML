@@ -17,7 +17,7 @@ The dataset used in this example is a preprocessed excerpt of the
 
 
 print __doc__
-
+import sys
 from time import time
 import logging
 import pylab as pl
@@ -30,6 +30,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import RandomizedPCA
 from sklearn.svm import SVC
+from sklearn.metrics import f1_score
 
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
@@ -66,7 +67,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random
 ###############################################################################
 # Compute a PCA (eigenfaces) on the face dataset (treated as unlabeled
 # dataset): unsupervised feature extraction / dimensionality reduction
-n_components = 150
+# n_components = 150 # original setting
+n_components_all = [10, 15, 25, 50, 100, 250] # explore different components
+n_components = n_components_all[4]
 
 print "Extracting the top %d eigenfaces from %d faces" % (n_components, X_train.shape[0])
 t0 = time()
@@ -81,6 +84,8 @@ X_train_pca = pca.transform(X_train)
 X_test_pca = pca.transform(X_test)
 print "done in %0.3fs" % (time() - t0)
 
+print "Top 5 explained variances: ", pca.explained_variance_ratio_[:5]
+
 
 ###############################################################################
 # Train a SVM classification model
@@ -92,7 +97,8 @@ param_grid = {
           'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1],
           }
 # for sklearn version 0.16 or prior, the class_weight parameter value is 'auto'
-clf = GridSearchCV(SVC(kernel='rbf', class_weight='balanced'), param_grid)
+# for sklearn version 0.17 or later, the class_weight parameter value is 'balanced'
+clf = GridSearchCV(SVC(kernel='rbf', class_weight='auto'), param_grid)
 clf = clf.fit(X_train_pca, y_train)
 print "done in %0.3fs" % (time() - t0)
 print "Best estimator found by grid search:"
@@ -110,6 +116,10 @@ print "done in %0.3fs" % (time() - t0)
 print classification_report(y_test, y_pred, target_names=target_names)
 print confusion_matrix(y_test, y_pred, labels=range(n_classes))
 
+# investigate f1 score
+f1_scr = f1_score(y_test, y_pred)
+print "the f1 score for n_components of ", n_components, " is: ", f1_scr
+sys.exit()
 
 ###############################################################################
 # Qualitative evaluation of the predictions using matplotlib
