@@ -38,6 +38,24 @@ labels_train   = labels_train[:150]
 
 
 ### your code goes here
+from sklearn.tree import DecisionTreeClassifier
+import numpy as np
+clf = DecisionTreeClassifier()
+clf.fit(features_train, labels_train)
+print clf.score(features_test, labels_test)
+print len(features_train)
+ftimp = clf.feature_importances_
+max_ftimp = max(ftimp)
+max_id = np.argmax(ftimp)
+print max_ftimp
+print max_id
+ft_names = vectorizer.get_feature_names()
+print ft_names[max_id]
 
-
+### Find features with importance higher than 0.2
+ftimp_bool = ftimp > 0.2
+signature_id = ftimp[ftimp_bool]
+#signature_words = ft_names[ftimp_bool]
+#print len(signature_words)
+print ftimp_bool.sum()
 
